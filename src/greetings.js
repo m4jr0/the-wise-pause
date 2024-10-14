@@ -56,8 +56,8 @@ class Greetings {
     return this.quote
   }
 
-  getFullQuote() {
-    return `${this.quotePrefix}“${this.getQuote()}”`
+  getQuotePrefix() {
+    return this.quotePrefix
   }
 }
 

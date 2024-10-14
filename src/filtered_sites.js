@@ -5,11 +5,11 @@ function getFilteredWebsites() {
     'www.youtube.com',
     'www.facebook.com',
     'www.twitter.com',
-    'www.x.com',
+    'x.com',
   ]
 }
 
 function isCurrentWebsiteMatch() {
-  const url = window.location.hostname
+  const url = window.location.host
   return getFilteredWebsites().includes(url)
 }
