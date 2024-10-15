@@ -71,6 +71,7 @@ function displayPopup() {
       }, 2000)
     })
 
+  // Use setTimeout(0) to ensure the CSS animation is triggered after DOM updates.
   setTimeout(() => {
     document.querySelector('#twp-overlay').classList.add('show')
     document.querySelector('#twp-popup').classList.add('open')
