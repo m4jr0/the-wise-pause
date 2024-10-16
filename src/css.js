@@ -11,6 +11,10 @@ const CSS = `
   --global-btn-hover-color: #0056b3;
 }
 
+body.no-scroll {
+  overflow: hidden;
+}
+
 #twp-container,
 #twp-container * {
   all: initial;
@@ -35,7 +39,6 @@ const CSS = `
   margin-bottom: 0.83em;
   margin-left: 0;
   margin-right: 0;
-  margin-top: 0.83em;
 }
 
 #twp-overlay {

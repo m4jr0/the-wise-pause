@@ -66,10 +66,14 @@ function displayPopup() {
       document.querySelector('#twp-overlay').classList.remove('show')
       document.querySelector('#twp-popup').classList.remove('open')
 
+      document.body.classList.remove('no-scroll')
+
       setTimeout(() => {
         document.body.removeChild(document.querySelector('#twp-container'))
       }, 2000)
     })
+
+  document.body.classList.add('no-scroll')
 
   // Use setTimeout(0) to ensure the CSS animation is triggered after DOM updates.
   setTimeout(() => {
