@@ -6,6 +6,7 @@ function getFilteredWebsites() {
     'www.facebook.com',
     'www.twitter.com',
     'x.com',
+    'example.com'
   ]
 }
 

@@ -8,10 +8,10 @@
 // @author        m4jr0
 // @match         *://*/*
 // @grant         none
-// @require       https://github.com/m4jr0/the-wise-pause/raw/main/src/css.js
-// @require       https://github.com/m4jr0/the-wise-pause/raw/main/src/greetings.js
-// @require       https://github.com/m4jr0/the-wise-pause/raw/main/src/filtered_sites.js
-// @require       https://github.com/m4jr0/the-wise-pause/raw/main/src/popup.js
+// @require       file://C:\Users\gcatto\Documents\Private\Projects\the-wise-pause/src/css.js
+// @require       file://C:\Users\gcatto\Documents\Private\Projects\the-wise-pause/src/greetings.js
+// @require       file://C:\Users\gcatto\Documents\Private\Projects\the-wise-pause/src/filtered_sites.js
+// @require       file://C:\Users\gcatto\Documents\Private\Projects\the-wise-pause/src/popup.js
 // ==/UserScript==
 
 ;(function () {
@@ -28,5 +28,5 @@ function handleCurrentWebsite() {
   }
 
   loadCss()
-  displayPopup()
+  showGreetings()
 }

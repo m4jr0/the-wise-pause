@@ -1,4 +1,4 @@
-function generateIntro() {
+function generateIntro () {
   const INTROS = [
     "Ah, I see you are about to venture once more into the realm of distraction. But, before you proceed, might I suggest a moment of quiet reflection? Is this truly the path you wish to tread, or could your time be better spent pursuing greater things, more meaningful endeavors? The choice, of course, is yours—but remember, even the smallest decisions can shape the course of one's destiny.",
     'It seems you’re on the verge of a detour into distraction. Before you continue, it might be worth reflecting—is this the best use of your time, or is there something more pressing that calls for your attention?',
@@ -15,7 +15,7 @@ function generateIntro() {
   return INTROS[Math.floor(Math.random() * INTROS.length)]
 }
 
-function generateQuotePrefix() {
+function generateQuotePrefix () {
   const QUOTE_PREFIX = [
     'As a wise soul once said, ',
     'As the saying goes, ',
@@ -36,7 +36,7 @@ function generateQuotePrefix() {
   return QUOTE_PREFIX[Math.floor(Math.random() * QUOTE_PREFIX.length)]
 }
 
-function generateQuote() {
+function generateQuote () {
   const QUOTES = [
     "Don't watch the clock; do what it does. Keep going.",
     'Success is not final, failure is not fatal: It is the courage to continue that counts.',
@@ -72,25 +72,85 @@ class Greetings {
   quotePrefix = '-'
   quote = '-'
 
-  constructor() {
+  constructor () {
     this.intro = generateIntro()
     this.quotePrefix = generateQuotePrefix()
     this.quote = generateQuote()
   }
 
-  getIntro() {
+  getIntro () {
     return this.intro
   }
 
-  getQuote() {
+  getQuote () {
     return this.quote
   }
 
-  getQuotePrefix() {
+  getQuotePrefix () {
     return this.quotePrefix
   }
 }
 
-function generateGreetings() {
+function generateGreetings () {
   return new Greetings()
+}
+
+function generateReply () {
+  const REPLIES = [
+    'Noted',
+    'Point taken',
+    "I'll reflect on that",
+    'Duly noted',
+    "I'll consider it",
+    "I'll keep that in mind",
+    'Message received',
+    'I see your point',
+    'Wise words',
+    'Understood',
+    'Something to think about',
+    'You have a point',
+    "I'll ponder that",
+    'Thanks for the insight',
+    "I'll take that to heart",
+  ]
+
+  return REPLIES[Math.floor(Math.random() * REPLIES.length)]
+}
+
+function onGreetingsPopupFill (popup) {
+  // Generate HTML using DOM node creation methods to keep our browser happy.
+  // https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/Safely_inserting_external_content_into_a_page
+  const greetings = generateGreetings()
+
+  const introParagraph = document.createElement('p')
+  introParagraph.className = 'twp-intro'
+  introParagraph.textContent = greetings.getIntro()
+  popup.appendChild(introParagraph)
+
+  const fullQuoteParagraph = document.createElement('p')
+  fullQuoteParagraph.className = 'twp-full-quote'
+
+  const quotePrefixText = document.createTextNode(
+    `${greetings.getQuotePrefix()}“`
+  )
+
+  fullQuoteParagraph.appendChild(quotePrefixText)
+
+  const quoteSpan = document.createElement('span')
+  quoteSpan.className = 'twp-quote'
+  quoteSpan.textContent = greetings.getQuote()
+  fullQuoteParagraph.appendChild(quoteSpan)
+
+  const closingQuoteText = document.createTextNode('”')
+  fullQuoteParagraph.appendChild(closingQuoteText)
+
+  popup.appendChild(fullQuoteParagraph)
+}
+
+function showGreetings () {
+  displayPopup({
+    title: 'Greetings, friend.',
+    onPopupFill: onGreetingsPopupFill,
+    closeBtnLabel: generateReply(),
+  })
 }
