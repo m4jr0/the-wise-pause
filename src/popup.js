@@ -1,83 +1,86 @@
-function generatePopupHtmlElements(greetings) {
-  const title = 'Greetings, friend.'
+function generatePopupHtml (ids, descr) {
+  // Generate HTML using DOM node creation methods to keep our browser happy.
+  // https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/Safely_inserting_external_content_into_a_page
+  const mainContainer = document.querySelector(`#${Context.MAIN_CONTAINER_ID}`)
 
-  const overlay = document.createElement('div')
-  overlay.id = 'twp-overlay'
+  const popupContainer = document.createElement('div')
+  popupContainer.id = ids.containerId
+  popupContainer.className = `${Context.CSS_PREFIX}popup-container`
+  mainContainer.appendChild(popupContainer)
 
   const popup = document.createElement('div')
-  popup.id = 'twp-popup'
+  popup.id = ids.popupId
+  popup.className = `${Context.CSS_PREFIX}popup`
 
+  if (descr.classes) {
+    popup.className += ` ${descr.classes}`
+  }
+
+  popupContainer.appendChild(popup)
+
+  const title = descr.title || 'A Notice to Consider.'
   const titleElement = document.createElement('h2')
-  titleElement.id = 'twp-popup-title'
   titleElement.textContent = title
   popup.appendChild(titleElement)
 
-  const introParagraph = document.createElement('p')
-  introParagraph.className = 'twp-intro'
-  introParagraph.textContent = greetings.getIntro()
-  popup.appendChild(introParagraph)
+  const popupContent = document.createElement('div')
+  popupContent.className = `${Context.CSS_PREFIX}popup-content`
 
-  const fullQuoteParagraph = document.createElement('p')
-  fullQuoteParagraph.className = 'twp-full-quote'
+  popup.appendChild(popupContent)
 
-  const quotePrefixText = document.createTextNode(
-    `${greetings.getQuotePrefix()}“`
-  )
-
-  fullQuoteParagraph.appendChild(quotePrefixText)
-
-  const quoteSpan = document.createElement('span')
-  quoteSpan.className = 'twp-quote'
-  quoteSpan.textContent = greetings.getQuote()
-  fullQuoteParagraph.appendChild(quoteSpan)
-
-  const closingQuoteText = document.createTextNode('”')
-  fullQuoteParagraph.appendChild(closingQuoteText)
-
-  popup.appendChild(fullQuoteParagraph)
+  descr.onPopupFill(ids.id, popupContent)
 
   const popupFooter = document.createElement('div')
-  popupFooter.id = 'twp-popup-footer'
+  popupFooter.className = `${Context.CSS_PREFIX}popup-footer`
 
   const closeButton = document.createElement('button')
-  closeButton.id = 'twp-popup-close-btn'
-  closeButton.textContent = 'I heard you'
+  closeButton.id = ids.closeBtnId
+  closeButton.className = `${Context.CSS_PREFIX}popup-close-btn`
+  closeButton.textContent = descr.closeBtnLabel || 'Dismiss'
   popupFooter.appendChild(closeButton)
 
   popup.appendChild(popupFooter)
-  overlay.appendChild(popup)
-
-  return overlay
+  return popupContainer
 }
 
-function displayPopup() {
-  const greetings = generateGreetings()
-  const popupElement = generatePopupHtmlElements(greetings)
+const showPopup = (() => {
+  let id = 0
 
-  const popupContainer = document.createElement('div')
-  popupContainer.id = 'twp-container'
-  popupContainer.appendChild(popupElement)
+  return descr => {
+    ++id
 
-  document.body.appendChild(popupContainer)
+    const ids = {
+      id,
+      popupId: `${Context.CSS_PREFIX}popup-${id}`,
+      containerId: `${Context.CSS_PREFIX}popup-${id}-container`,
+      closeBtnId: `${Context.CSS_PREFIX}popup-${id}-close-btn`
+    }
 
-  document
-    .querySelector('#twp-popup-close-btn')
-    .addEventListener('click', () => {
-      document.querySelector('#twp-overlay').classList.remove('show')
-      document.querySelector('#twp-popup').classList.remove('open')
+    generatePopupHtml(ids, descr)
+    const popupContainer = document.querySelector(`#${ids.containerId}`)
+    const closeBtn = document.querySelector(`#${ids.closeBtnId}`)
 
-      document.body.classList.remove('no-scroll')
+    const onClosingPopup = () => {
+      closeBtn.removeEventListener('click', onClosingPopup)
+
+      document
+        .querySelector(`#${ids.popupId}`)
+        .classList.remove(`${Context.CSS_PREFIX}open`)
+      descr.onPopupClosed?.(id)
+      popupContainer.style.pointerEvents = 'none'
 
       setTimeout(() => {
-        document.body.removeChild(document.querySelector('#twp-container'))
+        popupContainer.remove()
       }, 2000)
-    })
+    }
 
-  document.body.classList.add('no-scroll')
+    closeBtn.addEventListener('click', onClosingPopup)
 
-  // Use setTimeout(0) to ensure the CSS animation is triggered after DOM updates.
-  setTimeout(() => {
-    document.querySelector('#twp-overlay').classList.add('show')
-    document.querySelector('#twp-popup').classList.add('open')
-  }, 0)
-}
+    // Use setTimeout(0) to ensure the CSS animation is triggered after DOM updates.
+    setTimeout(() => {
+      document
+        .querySelector(`#${ids.popupId}`)
+        .classList.add(`${Context.CSS_PREFIX}open`)
+    }, 0)
+  }
+})()
