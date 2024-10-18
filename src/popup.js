@@ -1,83 +1,136 @@
-function generatePopupHtmlElements(greetings) {
-  const title = 'Greetings, friend.'
+class Popups {
+  static #closeCallbacks = {}
 
-  const overlay = document.createElement('div')
-  overlay.id = 'twp-overlay'
+  static show = (() => {
+    let id = 0
 
-  const popup = document.createElement('div')
-  popup.id = 'twp-popup'
+    return descr => {
+      ++id
 
-  const titleElement = document.createElement('h2')
-  titleElement.id = 'twp-popup-title'
-  titleElement.textContent = title
-  popup.appendChild(titleElement)
+      const ids = {
+        id,
+        popupId: `${Consts.MAIN_PREFIX}popup-${id}`,
+        containerId: `${Consts.MAIN_PREFIX}popup-${id}-container`,
+        closeBtnId: `${Consts.MAIN_PREFIX}popup-${id}-close-btn`
+      }
 
-  const introParagraph = document.createElement('p')
-  introParagraph.className = 'twp-intro'
-  introParagraph.textContent = greetings.getIntro()
-  popup.appendChild(introParagraph)
+      Popups.#generateHtml(ids, descr)
+      const popupContainer = document.querySelector(`#${ids.containerId}`)
+      const closeBtn = document.querySelector(`#${ids.closeBtnId}`)
 
-  const fullQuoteParagraph = document.createElement('p')
-  fullQuoteParagraph.className = 'twp-full-quote'
+      const onClosingPopup = () => {
+        closeBtn.removeEventListener('click', onClosingPopup)
+        delete Popups.#closeCallbacks[id]
 
-  const quotePrefixText = document.createTextNode(
-    `${greetings.getQuotePrefix()}“`
-  )
+        document
+          .querySelector(`#${ids.popupId}`)
+          .classList.remove(`${Consts.MAIN_PREFIX}open`)
 
-  fullQuoteParagraph.appendChild(quotePrefixText)
+        popupContainer.style.pointerEvents = 'none'
 
-  const quoteSpan = document.createElement('span')
-  quoteSpan.className = 'twp-quote'
-  quoteSpan.textContent = greetings.getQuote()
-  fullQuoteParagraph.appendChild(quoteSpan)
+        setTimeout(() => {
+          popupContainer.remove()
+        }, 2000)
+      }
 
-  const closingQuoteText = document.createTextNode('”')
-  fullQuoteParagraph.appendChild(closingQuoteText)
+      const onPopupClosed = (isClosedManually = false) => {
+        onClosingPopup()
+        descr.onPopupClosed?.(id)
+      }
 
-  popup.appendChild(fullQuoteParagraph)
+      closeBtn.addEventListener('click', onPopupClosed)
+      Popups.#closeCallbacks[id] = onClosingPopup
 
-  const popupFooter = document.createElement('div')
-  popupFooter.id = 'twp-popup-footer'
-
-  const closeButton = document.createElement('button')
-  closeButton.id = 'twp-popup-close-btn'
-  closeButton.textContent = 'I heard you'
-  popupFooter.appendChild(closeButton)
-
-  popup.appendChild(popupFooter)
-  overlay.appendChild(popup)
-
-  return overlay
-}
-
-function displayPopup() {
-  const greetings = generateGreetings()
-  const popupElement = generatePopupHtmlElements(greetings)
-
-  const popupContainer = document.createElement('div')
-  popupContainer.id = 'twp-container'
-  popupContainer.appendChild(popupElement)
-
-  document.body.appendChild(popupContainer)
-
-  document
-    .querySelector('#twp-popup-close-btn')
-    .addEventListener('click', () => {
-      document.querySelector('#twp-overlay').classList.remove('show')
-      document.querySelector('#twp-popup').classList.remove('open')
-
-      document.body.classList.remove('no-scroll')
-
+      // Use setTimeout(0) to ensure the CSS animation is triggered after DOM updates.
       setTimeout(() => {
-        document.body.removeChild(document.querySelector('#twp-container'))
-      }, 2000)
-    })
+        document
+          .querySelector(`#${ids.popupId}`)
+          .classList.add(`${Consts.MAIN_PREFIX}open`)
+      }, 0)
+    }
+  })()
 
-  document.body.classList.add('no-scroll')
+  static close (id) {
+    if (!Object.hasOwn(Popups.#closeCallbacks, id)) {
+      return
+    }
 
-  // Use setTimeout(0) to ensure the CSS animation is triggered after DOM updates.
-  setTimeout(() => {
-    document.querySelector('#twp-overlay').classList.add('show')
-    document.querySelector('#twp-popup').classList.add('open')
-  }, 0)
+    Popups.#closeCallbacks[id]()
+  }
+
+  static #generateHtml (ids, descr) {
+    // Generate HTML using DOM node creation methods to keep our browser happy.
+    // https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/Safely_inserting_external_content_into_a_page
+    const mainContainer = document.querySelector(`#${Consts.MAIN_CONTAINER_ID}`)
+
+    const popupContainer = document.createElement('div')
+    popupContainer.id = ids.containerId
+    popupContainer.className = `${Consts.MAIN_PREFIX}popup-container`
+    mainContainer.appendChild(popupContainer)
+
+    const popup = document.createElement('div')
+    popup.id = ids.popupId
+    popup.className = `${Consts.MAIN_PREFIX}popup`
+
+    if (descr.classes) {
+      popup.className += ` ${descr.classes}`
+    }
+
+    popupContainer.appendChild(popup)
+
+    const title = descr.title || 'A Notice to Consider.'
+    const titleElement = document.createElement('h2')
+    titleElement.textContent = title
+    popup.appendChild(titleElement)
+
+    const popupContent = document.createElement('div')
+    popupContent.className = `${Consts.MAIN_PREFIX}popup-content`
+
+    popup.appendChild(popupContent)
+
+    descr.onPopupFill(ids.id, popupContent)
+
+    const popupFooter = document.createElement('div')
+    popupFooter.className = `${Consts.MAIN_PREFIX}popup-footer`
+
+    const sideButtonsContainer = document.createElement('div')
+    sideButtonsContainer.className = `${Consts.MAIN_PREFIX}popup-footer-side-btns`
+
+    if (descr.sideButtons) {
+      for (const sideButtonDescr of descr.sideButtons) {
+        const sideButton = document.createElement('button')
+
+        if (sideButtonDescr.id) {
+          sideButton.id = sideButtonDescr.id
+        }
+
+        sideButton.className = `${Consts.MAIN_PREFIX}popup-footer-btn ${Consts.MAIN_PREFIX}popup-footer-side-btn`
+
+        if (sideButtonDescr.className) {
+          sideButton.className += ` ${sideButtonDescr.className}`
+        }
+
+        sideButton.textContent = sideButtonDescr.label || ''
+
+        if (sideButtonDescr.onClick) {
+          sideButton.addEventListener('click', () => {
+            sideButtonDescr.onClick(ids.id)
+          })
+        }
+
+        sideButtonsContainer.appendChild(sideButton)
+      }
+    }
+
+    popupFooter.appendChild(sideButtonsContainer)
+
+    const closeButton = document.createElement('button')
+    closeButton.id = ids.closeBtnId
+    closeButton.className = `${Consts.MAIN_PREFIX}popup-footer-btn`
+    closeButton.textContent = descr.closeBtnLabel || 'Dismiss'
+    popupFooter.appendChild(closeButton)
+
+    popup.appendChild(popupFooter)
+    return popupContainer
+  }
 }
