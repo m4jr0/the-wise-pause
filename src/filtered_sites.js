@@ -237,6 +237,7 @@ class FilteredSitesUi {
     const urlList = document.createElement('div')
     urlList.id = `${Consts.MAIN_PREFIX}url-list-${id}`
     urlList.className = `${Consts.MAIN_PREFIX}url-list no-spacing`
+
     popup.appendChild(urlList)
 
     const addSection = document.createElement('div')
@@ -289,6 +290,8 @@ class FilteredSitesUi {
     FilteredSites.save(websites)
   }
 
+  static #animationTimeMs = 700
+
   // Utils.
   static #fill (urlList, filteredWebsites) {
     DomUtils.clearElementChildren(urlList)
@@ -296,6 +299,10 @@ class FilteredSitesUi {
     filteredWebsites.forEach((website, _) => {
       FilteredSitesUi.#addWebsiteLine(urlList, website, false)
     })
+
+    setTimeout(() => {
+      FilteredSitesUi.#refreshScrollbarTag(urlList)
+    }, FilteredSitesUi.#animationTimeMs + 10)
   }
 
   static #addWebsiteLine (urlList, website = null, isAnimation = true) {
@@ -366,6 +373,10 @@ class FilteredSitesUi {
 
     if (!isAnimation) {
       urlList.appendChild(urlItem)
+
+      if (website !== null) {
+        FilteredSitesUi.#refreshScrollbarTag(urlList)
+      }
       return
     }
 
@@ -376,8 +387,6 @@ class FilteredSitesUi {
     const currentMarginTop = parseFloat(computedStyle.marginTop)
     const currentMarginBottom = parseFloat(computedStyle.marginBottom)
 
-    const timeoutMs = 700
-
     AnimationUtils.addElementSmoothly(
       urlItem,
       currentHeight,
@@ -385,7 +394,7 @@ class FilteredSitesUi {
       currentPaddingBottom,
       currentMarginTop,
       currentMarginBottom,
-      timeoutMs
+      FilteredSitesUi.#animationTimeMs
     )
 
     // Case: scrolling to the bottom of the page if necessary.
@@ -397,7 +406,7 @@ class FilteredSitesUi {
       clearInterval(intervalId)
       window.removeEventListener('wheel', onScroll)
       window.removeEventListener('scroll', onScroll)
-    }, timeoutMs)
+    }, FilteredSitesUi.#animationTimeMs)
 
     // Case: user decided to scroll.
     const onScroll = () => {
@@ -409,11 +418,39 @@ class FilteredSitesUi {
 
     window.addEventListener('wheel', onScroll)
     window.addEventListener('scroll', onScroll)
+
+    if (website === null) {
+      setTimeout(() => {
+        FilteredSitesUi.#refreshScrollbarTag(urlList)
+      }, FilteredSitesUi.#animationTimeMs + 10)
+    }
   }
 
   static #removeWebsiteLine (urlItem) {
-    AnimationUtils.removeElementSmoothly(urlItem, 700)
+    AnimationUtils.removeElementSmoothly(
+      urlItem,
+      FilteredSitesUi.#animationTimeMs
+    )
     urlItem.classList.add(`${Consts.MAIN_PREFIX}removing`)
+
+    setTimeout(() => {
+      const urlList = document.querySelector(
+        `#${Consts.MAIN_PREFIX}url-list-${FilteredSitesUi.#popupId}`
+      )
+
+      FilteredSitesUi.#refreshScrollbarTag(urlList)
+    }, FilteredSitesUi.#animationTimeMs + 10)
+  }
+
+  static #refreshScrollbarTag (urlList) {
+    const popup = urlList.parentElement
+    const isScrollbar = popup.scrollHeight > popup.clientHeight
+
+    if (isScrollbar) {
+      popup.classList.add(`${Consts.MAIN_PREFIX}with-scrollbar`)
+    } else {
+      popup.classList.remove(`${Consts.MAIN_PREFIX}with-scrollbar`)
+    }
   }
 
   static #generateUrlListId (popupId) {

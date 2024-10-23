@@ -22,8 +22,8 @@ class Css {
 
   --${Consts.MAIN_PREFIX}global-text-input-color: #f1f1f1;
 
-  --${Consts.MAIN_PREFIX}global-font: '-apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
-    "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif';
+  --${Consts.MAIN_PREFIX}global-font: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
+    "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --${Consts.MAIN_PREFIX}global-scroll-behavior: smooth;
 }
@@ -166,13 +166,14 @@ body.${Consts.MAIN_PREFIX}no-scroll {
   border: none;
   color: var(--${Consts.MAIN_PREFIX}global-btn-text-color);
   cursor: pointer;
+  font-size: 16px;
   padding: 10px;
   transition: background-color 0.3s ease;
 }
   
 #${Consts.MAIN_CONTAINER_ID} h2 {
   display: block;
-  font-size: 1.5em;
+  font-size: 24px;
   font-weight: bold;
   margin-bottom: 0.83em;
   margin-left: 0;
@@ -186,6 +187,7 @@ body.${Consts.MAIN_PREFIX}no-scroll {
 
 #${Consts.MAIN_CONTAINER_ID} p {
   display: block;
+  font-size: 16px;
   margin-block-end: 1em;
   margin-block-start: 1em;
   margin-inline-end: 0px;
@@ -291,6 +293,7 @@ body.${Consts.MAIN_PREFIX}no-scroll {
 #${Consts.MAIN_CONTAINER_ID} .${Consts.MAIN_PREFIX}url-list-domain-input {
   background: transparent;
   border: none;
+  font-size: 16px;
   padding: 5px;
   width: 70%;
 }
@@ -306,6 +309,14 @@ body.${Consts.MAIN_PREFIX}no-scroll {
   padding-top: 10px;
   padding: 15px;
   transition: opacity 0.3s;
+}
+
+#${Consts.MAIN_CONTAINER_ID}  .${Consts.MAIN_PREFIX}with-scrollbar .${Consts.MAIN_PREFIX}url-list-item {
+  margin-right: 10px;
+}
+
+#${Consts.MAIN_CONTAINER_ID}  .${Consts.MAIN_PREFIX}with-scrollbar .${Consts.MAIN_PREFIX}url-list-add-section {
+  margin-right: 10px;
 }
 
 #${Consts.MAIN_CONTAINER_ID} .${Consts.MAIN_PREFIX}url-list-item.${Consts.MAIN_PREFIX}show {
@@ -338,6 +349,10 @@ body.${Consts.MAIN_PREFIX}no-scroll {
 
 #${Consts.MAIN_CONTAINER_ID} .${Consts.MAIN_PREFIX}url-list-item-add-btn:hover {
   background: #CFD8DC;
+}
+
+#${Consts.MAIN_CONTAINER_ID} .${Consts.MAIN_PREFIX}url-list-add-section {
+  display: block;
 }
 
 #${Consts.MAIN_CONTAINER_ID} .${Consts.MAIN_PREFIX}url-list-item-buttons {
